@@ -216,17 +216,20 @@ const app = new Vue({
         if (event.ctrlKey || event.metaKey) {
           event.preventDefault();
           if (event.shiftKey) {
-            if (!document.activeElement?.classList?.contains("editable")) ctx.redo();
+            if (document.activeElement?.classList?.contains("editable")) document.activeElement.blur();
+            ctx.redo();
           }
           else {
-            if (!document.activeElement?.classList?.contains("editable")) ctx.undo();
+            if (document.activeElement?.classList?.contains("editable")) document.activeElement.blur();
+            ctx.undo();
           }
         }
       }
       if (keyChar == 'y') {
         if (event.ctrlKey || event.metaKey) {
           event.preventDefault();
-          if (!document.activeElement?.classList?.contains("editable")) ctx.redo();
+          if (document.activeElement?.classList?.contains("editable")) document.activeElement.blur();
+          ctx.redo();
         }
       }
     });
@@ -254,9 +257,14 @@ const app = new Vue({
     },
 
     setCurrentResume(resume) {
+      this.initSave();
+
+      this.allowSave = false;
       this.resume = resume;
       this.currentSaveQueue = saveQueueManager.getNewQueue(resume._id);
       this.history = new VersionHistory(this.resume);
+      let ctx = this;
+      setTimeout(()=> ctx.allowSave = true, 500);
     },
 
     loadResumes() {
@@ -324,6 +332,7 @@ const app = new Vue({
     },
 
     initSave() {
+      if (!this.resume) return;
       this.currentSaveQueue.add(new ResumeSaveQueueRequest(this.sendSaveRequest, this.resume))
     },
 

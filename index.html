@@ -19,8 +19,8 @@
         <div id="versionHistory" class="toolbar-button-list">
           <a :disabled="!history.canUndo()" @click="undo"><i class="fa fa-undo"></i></a>
           <a :disabled="!history.canRedo()" @click="redo"><i class="fa fa-redo"></i></a>
+          <div id="saveStatus" v-if="saveStatus"><em>{{saveStatus}}</em></div>
         </div>
-        <div id="saveStatus" v-if="saveStatus"><em>{{saveStatus}}</em></div>
       </div>
 
       <div class="toolbar-row">
