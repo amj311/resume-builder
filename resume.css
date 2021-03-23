@@ -48,6 +48,9 @@ a {
     outline: none;
     box-shadow: 0 0 0 1px #888;
     cursor: text;
+    box-shadow: 0 0 0 1px #888 !important;
+    cursor: text;
+    max-width: none !important;
 }
 
 div#mainToolBar {
@@ -76,6 +79,10 @@ div#fileName .editable {
     font-size: 1.5em;
     box-shadow: 0 0 0 1px #bbb;
     padding: 0 .25em;
+    max-width: 16rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .toolbar-row > div:not(:last-child) {
