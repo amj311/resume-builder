@@ -8,6 +8,7 @@ class ResumeSaveQueue {
     this.queue = [];
     this.processing = false;
     this.lastReqFailed = false;
+    this.lastSaved = null;
   }
 
   add(newRequest, finishAllPrevious=false) {
@@ -34,6 +35,7 @@ class ResumeSaveQueue {
       ctx.processing = false;
       if (req.onSuccess) req.onSuccess(res);
       ctx.lastReqFailed = false;
+      ctx.lastSaved = JSON.stringify(req.resume);
       ctx.sendNextRequest();
     }
     

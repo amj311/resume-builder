@@ -1,7 +1,7 @@
 const {test, expect,  beforeEach} = require("oliver-test");
-const { ChangeHistory, ChangeCommand } = require("../ChangeHistory");
+const { CommandManager, ChangeCommand } = require("../CommandManager");
 
-let changeHistory;
+let cmdManager;
 let doc;
 let oldDoc = {};
 let changeDoc = {msg:"I'm new!"};
@@ -12,12 +12,12 @@ function swap(prev, next) {
 
 beforeEach(()=> {
   doc = oldDoc;
-  changeHistory = new ChangeHistory();
+  cmdManager = new CommandManager();
 })
 
 test("should not redo or undo when no actions", () => {
-  expect.false(changeHistory.canUndo())
-  expect.false(changeHistory.canRedo())
+  expect.false(cmdManager.canUndo())
+  expect.false(cmdManager.canRedo())
 })
 
 test("should apply change to src as deep copy", () => {
@@ -26,7 +26,7 @@ test("should apply change to src as deep copy", () => {
   let change = new ChangeCommand(
     ()=>{doc = newData},
     ()=>{doc = oldData});
-  changeHistory.execute(change);
+  cmdManager.execute(change);
   expect.notNull(doc);
   expect.notUndefined(doc.msg);
   expect.equal(doc.msg, changeDoc.msg);
@@ -35,9 +35,9 @@ test("should apply change to src as deep copy", () => {
 })
 
 test("should only undo when one action", () => {
-  let change = new ChangeCommand();  changeHistory.execute(change);
-  expect.true(changeHistory.canUndo())
-  expect.false(changeHistory.canRedo())
+  let change = new ChangeCommand();  cmdManager.execute(change);
+  expect.true(cmdManager.canUndo())
+  expect.false(cmdManager.canRedo())
 })
 
 test("should revert to original when undo", () => {
@@ -46,8 +46,8 @@ test("should revert to original when undo", () => {
   let change = new ChangeCommand(
     ()=>{doc = newData},
     ()=>{doc = oldData});
-  changeHistory.execute(change);
-  changeHistory.undo();
+  cmdManager.execute(change);
+  cmdManager.undo();
   
   expect.notNull(doc);
   expect.undefined(doc.msg);
@@ -61,9 +61,9 @@ test("should apply change when redo", () => {
   let change = new ChangeCommand(
     ()=>{doc = newData},
     ()=>{doc = oldData});
-  changeHistory.execute(change);
-  changeHistory.undo();
-  changeHistory.redo();
+  cmdManager.execute(change);
+  cmdManager.undo();
+  cmdManager.redo();
   expect.notNull(doc);
   expect.notUndefined(doc.msg);
   expect.equal(doc.msg, changeDoc.msg);

@@ -16,6 +16,10 @@
     <div ui id="mainToolBar">
       <div class="toolbar-row" v-if="resume">
         <div id="fileName"><editable v-model="resume.fileName"></editable></div>
+        <div id="versionHistory" class="toolbar-button-list">
+          <a :disabled="!history.canUndo()" @click="undo"><i class="fa fa-undo"></i></a>
+          <a :disabled="!history.canRedo()" @click="redo"><i class="fa fa-redo"></i></a>
+        </div>
         <div id="saveStatus" v-if="saveStatus"><em>{{saveStatus}}</em></div>
       </div>
 
@@ -24,7 +28,7 @@
           <a @click="createNewResumeOnServer(null)">New</a>
           <a @click="startOpenSequence">Open</a>
           <a @click="createNewResumeOnServer(resume)">Duplicate</a>
-          <a @click="saveResumeToServer">Save</a>
+          <a @click="saveState">Save</a>
           <a @click="showPrintModal = true">Export</a>
           <a @click="showJsonModal = true">{json}</a>
         </div>
@@ -175,6 +179,7 @@
   <script type="text/javascript" src="//unpkg.com/html2canvas@1.0.0-rc.5/dist/html2canvas.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/dompurify@2.2.7/dist/purify.min.js"></script>
 
+  <script src="VersionHistory.js"></script>
   <script src="SaveQueue.js"></script>
   <script src="resumeData.js"></script>
   <script src="index.js"></script>

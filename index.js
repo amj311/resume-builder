@@ -20,7 +20,7 @@ Vue.component('editable', {
   props: ['value'],
   watch: {
     value: function (newValue) {
-      initVueSave();
+      saveState();
 
       if (document.activeElement == this.$el) {
         return;
@@ -57,7 +57,7 @@ Vue.component('pointListItemControls',{
     },
     setIcon(code) {
       this.list[this.idx].icon = code;
-      initVueSave();
+      saveState();
     }
   }
 })
@@ -87,11 +87,11 @@ Vue.component('listItemControls',{
     duplicate() {
       let newObj = JSON.parse(JSON.stringify(this.list[this.idx]));
       this.list.push(newObj);
-      initVueSave();
+      saveState();
     },
     remove() {
       this.$delete(this.list,this.idx);
-      initVueSave();
+      saveState();
     }
   }
 })
@@ -119,7 +119,7 @@ Vue.component('editableList',{
   methods: {
     insertNew() {
       this.list.push({...this.defaultNew});
-      initVueSave();
+      saveState();
     }
   }
 })
@@ -184,6 +184,8 @@ const app = new Vue({
     apiUrl: "http://localhost:4200/api",
     resume: null,
     currentSaveQueue: null,
+    allowSave: true,
+    history: new VersionHistory(),
     pdfImg: null,
     generatingImage: false,
     showPdfModal: false,
@@ -197,15 +199,21 @@ const app = new Vue({
   },
 
   beforeMount() {
-      window.addEventListener('keydown', function(event) {
-        if (event.ctrlKey || event.metaKey) {
-            switch (String.fromCharCode(event.which).toLowerCase()) {
-            case 's':
-                event.preventDefault();
-                initVueSave();
-                break;
-            }
+    
+    window.onbeforeunload = confirmExit;
+    function confirmExit() {
+        return "You have attempted to leave this page. Are you sure?";
+    }
+
+    window.addEventListener('keydown', function (event) {
+      if (event.ctrlKey || event.metaKey) {
+        switch (String.fromCharCode(event.which).toLowerCase()) {
+          case 's':
+            event.preventDefault();
+            saveState();
+            break;
         }
+      }
     });
     setTimeout(this.startOpenSequence,2000);
   },
@@ -232,6 +240,7 @@ const app = new Vue({
     setCurrentResume(resume) {
       this.resume = resume;
       this.currentSaveQueue = saveQueueManager.getNewQueue(resume._id);
+      this.history = new VersionHistory(this.resume);
     },
 
     loadResumes() {
@@ -271,8 +280,34 @@ const app = new Vue({
       })
     },
 
-    saveResumeToServer() {
-      if (!this.resume) return;
+    saveState() {
+      if (!this.resume || !this.allowSave) return;
+      this.allowSave = false;
+      this.history.saveVersionOfObject(this.resume);
+      this.initSave();
+      let ctx = this;
+      setTimeout(()=> ctx.allowSave = true, 0);
+    },
+    
+    undo() {
+      if (!this.resume || !this.allowSave || !this.history.canUndo()) return;
+      this.allowSave = false;
+      this.resume = this.history.popPrev();
+      this.initSave();
+      let ctx = this;
+      setTimeout(()=>ctx.allowSave = true, 0);
+    },
+    
+    redo() {
+      if (!this.resume || !this.allowSave || !this.history.canRedo()) return;
+      this.allowSave = false;
+      this.resume = this.history.popNext();
+      this.initSave();
+      let ctx = this;
+      setTimeout(()=>ctx.allowSave = true, 0);
+    },
+
+    initSave() {
       this.currentSaveQueue.add(new ResumeSaveQueueRequest(this.sendSaveRequest, this.resume))
     },
 
@@ -322,14 +357,19 @@ const app = new Vue({
     saveStatus() {
       if (!this.currentSaveQueue) return null;
       let status = this.currentSaveQueue.status();
-      if (status == ResumeSaveQueue_Saved) return "All changes saved."
-      if (status == ResumeSaveQueue_Error) return "Saving error."
+      if (status == ResumeSaveQueue_Error) return "Saving error"
       if (status == ResumeSaveQueue_Saving) return "Saving..."
+      
+      if (this.currentSaveQueue.lastSaved && this.currentSaveQueue.lastSaved != JSON.stringify(this.resume))
+        return "Unsaved"
+
+      if (status == ResumeSaveQueue_Saved) return "All changes saved"
+
     }
   }
 })
 
 
-function initVueSave() {
-  app.saveResumeToServer();
+function saveState() {
+  app.saveState();
 }

@@ -1,4 +1,4 @@
-class ChangeHistory {
+class CommandManager {
   constructor() {
     this.past = [];
     this.future = [];
@@ -53,4 +53,4 @@ class ChangeCommand {
 //   }
 // }
 
-module.exports = {ChangeHistory, ChangeCommand}
+module.exports = {CommandManager, ChangeCommand}
