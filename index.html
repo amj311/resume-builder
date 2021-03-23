@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Builder</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="resume.css">
+</head>
+
+<body>
+  <div id="app" style="display: none;" :style="{display: 'flex !important'}">
+    <div ui id="mainToolBar">
+      <div class="toolbar-row" v-if="resume">
+        <div id="fileName"><editable v-model="resume.fileName"></editable></div>
+        <div id="saveStatus" v-if="saveStatus"><em>{{saveStatus}}</em></div>
+      </div>
+
+      <div class="toolbar-row">
+        <div id="mainActions" class="toolbar-button-list">
+          <a @click="createNewResumeOnServer(null)">New</a>
+          <a @click="startOpenSequence">Open</a>
+          <a @click="createNewResumeOnServer(resume)">Duplicate</a>
+          <a @click="saveResumeToServer">Save</a>
+          <a @click="showPrintModal = true">Export</a>
+          <a @click="showJsonModal = true">{json}</a>
+        </div>
+        <div id="zoom" class="toolbar-button-list toolbar-button-group">
+          <a @click="decZoom" :disabled="pageZoom <= minZoom"><i class="fa fa-search-minus"></i></a>
+          <span>{{Math.round(pageZoom*100)}}%</span>
+          <a @click="incZoom" :disabled="pageZoom >= maxZoom"><i class="fa fa-search-plus"></i></a>
+        </div>
+      </div>
+    </div>
+      <div v-if="!resume">
+
+      </div>
+      <div v-else id="editorSpace">
+
+        <div id="leftPanel" ui="" class="ui-panel">
+          <div class="active-panel-container"></div>
+          <div class="panel-nav-container">
+            <div class="panel-nav-transform">
+                <div class="panel-nav-tab"><i class="fa fa-magic"></i> Design</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div ui id="mainToolBarSpacer"></div> -->
+
+        <div id="centerPanel">        
+          <div id="page-wrapper">
+            <div id="page">
+              <div id="bgLayer" class="page-layer"></div>
+              <div id="contentLayer" class="page-layer">
+                <div id="sideBar">
+                  <div class="decor-geo-sqr" style="
+                    top: -205px;
+                    left: -210px;
+                    transform: rotate(57deg);
+                    opacity: .1;
+                  "></div>
+                  <div class="decor-geo-sqr" style="
+                    top: -233px;
+                    left: 40px;
+                    transform: rotate(-67deg);
+                    /* opacity: .1; */
+                  "></div>
+                  
+                  <div id="sideBarHeader">
+                    <!-- <h1>{{resume.name}}</h1> -->
+                    <!-- <div class="logo" v-if="resume.logo" :style="{backgroundImage: `url(${resume.logo})`}" ></div> -->
+                  </div>
+                  <div id="sideBarContent">
+                    <sectionlist :path="['sideSections']" :list="resume.sideSections" />
+                  </div>
+                </div>
+      
+                <div id="mainPanel">
+                  <div id="letterhead">
+                    <h1><editable v-model="resume.bio.name" /></h1>
+                    <h2><editable v-model="resume.bio.subtitle" /></h2>
+                    <hr />
+                  </div>
+      
+                  <div id="mainContent">
+                    <div v-if="resume.showBio" class="main-content-section">
+                      <h2>Personal Profile</h2>
+                      <div>{{resume?.bio}}</div>
+                    </div>
+      
+                    <sectionlist :path="['mainSections']" :list="resume.mainSections" />
+
+                  </div>
+      
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="rightPanel" ui class="ui-panel"></div>
+
+      </div>
+
+    <div ui>
+      <div id="pdfModal" v-if="showPdfModal" class="modal-wrapper">
+        <div class="modal-container">
+          <div class="closer" @click="showPdfModal = false;">&times;</div>
+          <img v-if="pdfImg" :src="pdfImg" id="pdfImg" />
+          <button @click="savePdf">Export</button>
+        </div>
+      </div>
+  
+      <div id="printModal" v-if="showPrintModal" class="modal-wrapper">
+        <div class="modal-container">
+          <div class="closer" @click="showPrintModal = false;">&times;</div>
+          <h1>Export with Browser</h1>
+          
+          <div class="modal-body">
+            <img src="./images/print_instructions.jpg" id="printImg" />
+          </div>
+
+          <button @click="browserPrint(); showPrintModal = false;">Export</button>
+
+        </div>
+      </div>
+  
+      <div id="openResModal" v-if="showOpenModal" class="modal-wrapper">
+        <div class="modal-container">
+          <div class="closer" @click="showOpenModal = false;">&times;</div>
+          <h1>Open A Resume</h1>
+
+          <div class="modal-body">
+            <div v-for="resume in allResumes" class="open-list-item">
+              <div @click="setCurrentResume(resume); showOpenModal = false" class="open-list-item-details">
+                <a href="#">{{resume.fileName || 'Unnamed Resume'}}</a>
+              </div>
+              <div class="toolbar-button-list">
+                <a @click="createNewResumeOnServer(resume)"><i class="far fa-clone"></i></a>
+                <a @click="sendDeleteRequest(resume._id)"><i class="fa fa-trash"></i></a>  
+              </div>
+            </div>
+          </div>
+
+          <a style="font-weight: bold; padding: .5em; display:block " @click="createNewResumeOnServer(); showOpenModal = false;">+ New Resume</a>
+
+        </div>
+      </div>
+  
+      <div id="jsonModal" v-if="showJsonModal" class="modal-wrapper">
+        <div class="modal-container">
+          <div class="closer" @click="showJsonModal = false;">&times;</div>
+          <h1>JSON For Current Resume</h1>
+          <div class="modal-body">
+            <code><pre>{{JSON.stringify(resume, null, '\t')}}</pre></code>  
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Vue Dev -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+  <!-- Vue Prod -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script> -->
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/axios/0.20.0-0/axios.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/html2canvas@1.0.0-rc.5/dist/html2canvas.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/dompurify@2.2.7/dist/purify.min.js"></script>
+
+  <script src="SaveQueue.js"></script>
+  <script src="resumeData.js"></script>
+  <script src="index.js"></script>
+</body>
+
+</html>
