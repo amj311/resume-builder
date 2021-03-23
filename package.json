@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node tests/runTests.js",
     "start": "node server.js"
   },
   "author": "amj311 <contact@arthurjudd.com> (arthurjudd.com)",
@@ -14,5 +14,8 @@
     "express": "^4.17.1",
     "mongodb": "^3.6.4",
     "mongoose": "^5.11.20"
+  },
+  "devDependencies": {
+    "oliver-test": "^1.4.0"
   }
 }
