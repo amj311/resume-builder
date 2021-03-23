@@ -205,16 +205,32 @@ const app = new Vue({
         return "You have attempted to leave this page. Are you sure?";
     }
 
+    let ctx = this;
     window.addEventListener('keydown', function (event) {
-      if (event.ctrlKey || event.metaKey) {
-        switch (String.fromCharCode(event.which).toLowerCase()) {
-          case 's':
-            event.preventDefault();
-            saveState();
-            break;
+      let keyChar = String.fromCharCode(event.which).toLowerCase();
+      if (keyChar == 's' && (event.ctrlKey || event.metaKey)) {
+          event.preventDefault();
+          ctx.saveState();
+      }
+      if (keyChar == 'z') {
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          if (event.shiftKey) {
+            if (!document.activeElement?.classList?.contains("editable")) ctx.redo();
+          }
+          else {
+            if (!document.activeElement?.classList?.contains("editable")) ctx.undo();
+          }
+        }
+      }
+      if (keyChar == 'y') {
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          if (!document.activeElement?.classList?.contains("editable")) ctx.redo();
         }
       }
     });
+
     setTimeout(this.startOpenSequence,2000);
   },
 
