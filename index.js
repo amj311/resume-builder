@@ -181,7 +181,7 @@ const app = new Vue({
     loading: true,
     showOpenModal: false,
     allResumes: null,
-    apiUrl: "https://functional-kindly-strand.glitch.me/api/",
+    apiUrl: "https://cut-morning-tailor.glitch.me/api/",
     resume: null,
     currentSaveQueue: null,
     allowSave: true,
