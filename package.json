@@ -14,7 +14,8 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "mongodb": "^3.6.4",
-    "mongoose": "^5.11.20"
+    "mongoose": "^5.11.20",
+    "node-cmd": "^4.0.0"
   },
   "devDependencies": {
     "oliver-test": "^1.4.0"
