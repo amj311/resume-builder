@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({
 app.use(express.static('./'))
 app.use(cors());
 
-let port = 4200;
+let port = process.env.PORT || 4200;
 app.listen(port, () => console.log('Server listening on port '+port));
 
 const MongoClient = require('mongodb').MongoClient
@@ -129,28 +129,4 @@ app.delete('/api/resume/:id', async(req, res) => {
     res.status(500);
     res.json({ok:false});
   });
-});
-
-
-
-app.post('/git', (req, res) => {
-  // If event is "push"
-  if (req.headers['x-github-event'] == "push") {
-    cmd.run('chmod 777 git.sh'); /* :/ Fix no perms after updating */
-    cmd.get('./git.sh', (err, data) => {  // Run our script
-      if (data) console.log(data);
-      if (err) console.log(err);
-    });
-    cmd.run('refresh');  // Refresh project
-  
-    console.log("> [GIT] Updated with origin/master");
-    if (req.body.head_commit) {
-      let commits = req.body.head_commit.message.split("\n").length == 1 ?
-              req.body.head_commit.message :
-              req.body.head_commit.message.split("\n").map((el, i) => i !== 0 ? "                       " + el : el).join("\n");
-      console.log(`        Latest commit: ${commits}`);
-    }
-  }
-
-  return res.sendStatus(200); // Send back OK status
 });

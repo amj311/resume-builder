@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "node tests/runTests.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "commit": "git add . && git commit -m $MSG && git push && git push cpanel"
   },
   "author": "amj311 <contact@arthurjudd.com> (arthurjudd.com)",
   "license": "ISC",

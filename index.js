@@ -181,7 +181,7 @@ const app = new Vue({
     loading: true,
     showOpenModal: false,
     allResumes: null,
-    apiUrl: "https://cut-morning-tailor.glitch.me/api",
+    apiUrl: "https://amj311-resume-builder.herokuapp.com",
     resume: null,
     currentSaveQueue: null,
     allowSave: true,
