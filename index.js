@@ -181,7 +181,7 @@ const app = new Vue({
     loading: true,
     showOpenModal: false,
     allResumes: null,
-    apiUrl: "https://amj311-resume-builder.herokuapp.com",
+    apiUrl: "https://amj311-resume-builder.herokuapp.com/api",
     resume: null,
     currentSaveQueue: null,
     allowSave: true,
