@@ -236,11 +236,11 @@ div#leftPanel {
     display: flex;
 }
 
-.panel-nav-tab {
-    padding: .5em .5em;
-    width: max-content;
-    user-select: none;
-    /* border-right: 1px solid #eee; */
+
+.panel-nav-container {
+    width: 2rem;
+    position: relative;
+    border-left: 1px solid #eee;
 }
 
 .panel-nav-transform {
@@ -249,13 +249,18 @@ div#leftPanel {
     top: 0;
     transform: rotate(90deg);
     transform-origin: 1em 1.2em;
+    min-width: max-content;
+    display: flex;
 }
 
-.panel-nav-container {
-    width: 2rem;
-    position: relative;
-    border-left: 1px solid #eee;
+.panel-nav-tab {
+    padding: .5em .5em;
+    width: max-content;
+    user-select: none;
+    /* border-right: 1px solid #eee; */
+    transform: rotate(-180deg);
 }
+
 
 .ui-panel {
     background: #fff;
