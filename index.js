@@ -85,7 +85,7 @@ Vue.component('listItemControls',{
       Vue.set(this.list,targetIdx,item);
     },
     duplicate() {
-      let newObj = JSON.parse(JSON.stringify(this.list[this.idx]));
+      let newObj = createDuplicate(this.list[this.idx]);
       this.list.push(newObj);
       saveState();
     },
@@ -118,7 +118,7 @@ Vue.component('editableList',{
   props: ['list', 'defaultNew'],
   methods: {
     insertNew() {
-      this.list.push({...this.defaultNew});
+      this.list.pushcreateDuplicate(this.defaultNew);
       saveState();
     }
   }
@@ -281,10 +281,9 @@ const app = new Vue({
 
     createNewResumeOnServer(givenData) {
       let resumeData;
-      if (!givenData) resumeData = {...defaultResumeData};
+      if (!givenData) resumeData = createDuplicate(defaultResumeData);
       else {
-        resumeData = {...givenData}
-        resumeData = {...givenData}
+        resumeData = createDuplicate(givenData)
         resumeData.fileName = "Copy of " + resumeData.fileName;
       }
       delete resumeData._id;
@@ -394,7 +393,10 @@ const app = new Vue({
   }
 })
 
-
 function saveState() {
   app.saveState();
+}
+
+function createDuplicate(obj) {
+  return JSON.parse(JSON.stringify(obj));
 }
